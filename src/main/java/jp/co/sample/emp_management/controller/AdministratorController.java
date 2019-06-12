@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -66,10 +67,16 @@ public class AdministratorController {
 	 * 
 	 * @param form
 	 *            管理者情報用フォーム
+	 * @param result
+	 *            BindingResultオブジェクト
 	 * @return ログイン画面へリダイレクト
 	 */
 	@RequestMapping("/insert")
-	public String insert(InsertAdministratorForm form) {
+	public String insert(@Validated InsertAdministratorForm form, BindingResult result) {
+	    if (result.hasErrors()) {
+	        return "administrator/insert";
+	    }
+
 		Administrator administrator = new Administrator();
 		// フォームからドメインにプロパティ値をコピー
 		BeanUtils.copyProperties(form, administrator);
@@ -96,7 +103,7 @@ public class AdministratorController {
 	 * @param form
 	 *            管理者情報用フォーム
 	 * @param result
-	 *            エラー情報格納用オブッジェクト
+	 *            エラー情報格納用オブジェクト
 	 * @return ログイン後の従業員一覧画面
 	 */
 	@RequestMapping("/login")
