@@ -55,6 +55,29 @@
 			<li class="active"><a href="list.html" th:href="@{/employee/showList}">従業員リスト</a></li>
 		</ol>
 
+		<!-- メッセージ -->
+		<div class="row" th:if="${message}">
+			<div class="col-lg-offset-2 col-lg-8 col-md-offset-2 col-md-8 col-sm-12 col-xs-12">
+				<div class="alert alert-danger" th:text="${message}">
+					名前に「佐藤」を含む従業員は見つかりませんでした
+				</div>
+			</div>
+		</div>
+
+		<!-- 検索ボックス -->
+		<div class="row" style="margin-bottom: 1rem;">
+			<div class="col-lg-offset-2 col-lg-8 col-md-offset-2 col-md-8 col-sm-12 col-xs-12">
+				<form th:action="@{/employee/search}" method="get" class="form-inline">
+					<legend>従業員検索</legend>
+					<div class="form-group">
+						<label for="search-name" class="sr-only">名前</label>
+						<input type="text" name="name" id="search-name" class="form-control" placeholder="名前">
+					</div>
+					<button class="btn btn-default">検索</button>
+				</form>
+			</div>
+		</div>
+
 		<!-- table -->
 		<div class="row">
 			<div

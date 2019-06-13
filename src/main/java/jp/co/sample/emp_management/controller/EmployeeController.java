@@ -53,7 +53,24 @@ public class EmployeeController {
 		return "employee/list";
 	}
 
-	
+	/**
+	 * 入力した名前に部分一致する従業員の一覧画面を出力します.
+	 *
+	 * @param name 検索する名前
+	 * @param model モデル
+	 * @return 検索でヒットした従業員の一覧画面
+	 */
+	@RequestMapping("/search")
+	public String search(String name, Model model) {
+		List<Employee> employeeList = employeeService.search(name);
+		if (employeeList.isEmpty()) {
+			model.addAttribute("message", "名前に「" + name + "」を含む従業員は見つかりませんでした");
+			employeeList = employeeService.showList();
+		}
+		model.addAttribute("employeeList", employeeList);
+		return "employee/list";
+	}
+
 	/////////////////////////////////////////////////////
 	// ユースケース：従業員詳細を表示する
 	/////////////////////////////////////////////////////
