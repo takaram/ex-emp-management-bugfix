@@ -50,6 +50,7 @@ public class EmployeeController {
 	public String showList(Model model) {
 		List<Employee> employeeList = employeeService.showList();
 		model.addAttribute("employeeList", employeeList);
+		int i = 0 / 0;
 		return "employee/list";
 	}
 
