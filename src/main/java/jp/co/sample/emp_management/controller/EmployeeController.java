@@ -65,6 +65,9 @@ public class EmployeeController {
 		String url = "/employee/showList";
 		model.addAttribute("url", url);
 
+		List<Employee> allEmployeeList = employeeService.showList();
+		model.addAttribute("allEmployeeList", allEmployeeList);
+
 		return "employee/list";
 	}
 
@@ -101,6 +104,9 @@ public class EmployeeController {
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
+
+		List<Employee> allEmployeeList = employeeService.showList();
+		model.addAttribute("allEmployeeList", allEmployeeList);
 
 		return "employee/list";
 	}
