@@ -18,6 +18,7 @@ import jp.co.sample.emp_management.repository.EmployeeRepository;
 @Service
 @Transactional
 public class EmployeeService {
+	private static final int EMPLOYEES_PER_PAGE = 10;
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
@@ -32,6 +33,30 @@ public class EmployeeService {
 		return employeeList;
 	}
 	
+	/**
+	 * 従業員情報を10件ずつ取得します.
+	 * 
+	 * @param page ページ番号 (1オリジン)
+	 * @return 取得した従業員情報のリスト
+	 */
+	public List<Employee> showList(int page) {
+		if (page < 1) {
+			throw new IllegalArgumentException("ページ番号は1以上でなければなりません");
+		}
+		int offset = (page - 1) * EMPLOYEES_PER_PAGE;
+		return employeeRepository.findAll(EMPLOYEES_PER_PAGE, offset);
+	}
+
+	/**
+	 * 従業員リストの最大のページ数を取得します.
+	 * 
+	 * @return 従業員リストの最大のページ数
+	 */
+	public int getMaxPageCount() {
+		int size = employeeRepository.getSize();
+		return (size - 1) / EMPLOYEES_PER_PAGE + 1;
+	}
+
 	/**
 	 * 従業員情報を取得します.
 	 * 
@@ -61,5 +86,32 @@ public class EmployeeService {
 	 */
 	public List<Employee> search(String name) {
 		return employeeRepository.searchByName(name);
+	}
+
+	/**
+	 * 名前の部分一致で従業員情報を検索します.
+	 *
+	 * @param name 検索する名前
+	 * @param page ページ番号(1オリジン)
+	 * @return 見つかった従業員情報のリスト.
+	 */
+	public List<Employee> search(String name, int page) {
+		if (page < 1) {
+			throw new IllegalArgumentException("ページ番号は1以上でなければなりません");
+		}
+		int offset = (page - 1) * EMPLOYEES_PER_PAGE;
+		return employeeRepository.searchByName(name, EMPLOYEES_PER_PAGE, offset);
+	}
+
+	/**
+	 * 名前検索での従業員リストの最大のページ数を取得します.
+	 * 
+	 * @param name 検索する名前
+	 * @return 名前検索での従業員リストの最大のページ数
+	 */
+	public int getMaxPageCount(String name) {
+		int size = employeeRepository.getSize(name);
+		System.out.println(size);
+		return (size - 1) / EMPLOYEES_PER_PAGE + 1;
 	}
 }

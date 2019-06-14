@@ -117,6 +117,36 @@
 
 			</div>
 		</div>
+
+		<!-- ページネーション -->
+		<div class="page-nav">
+			<div>
+				<div th:switch="${currentPage}">
+					<span th:case="1" class="disabled-link">&lt;&lt;</span>
+					<a th:case="*" href="#" th:href="@{${url}(page=1)}">&lt;&lt;</a>
+				</div>
+				<div th:switch="${currentPage}">
+					<span th:case="1" class="disabled-link">&lt;</span>
+					<a th:case="*" href="#" th:href="@{${url}(page=${currentPage - 1})}">&lt;</a>
+				</div>
+				<th:block th:each="p : ${#numbers.sequence(shownPageRange[0], shownPageRange[1])}" th:switch="${currentPage}">
+					<div th:case="${p}" class="active">
+						<span class="current-page" th:text="${p}">2</span>
+					</div>
+					<div th:case="*">
+						<a href="#" th:href="@{${url}(page=${p})}" th:text="${p}">1</a>
+					</div>
+				</th:block>
+				<div th:switch="${currentPage}">
+					<span th:case="${maxPage}" class="disabled-link">&gt;</span>
+					<a th:case="*" href="#" th:href="@{${url}(page=${currentPage + 1})}">&gt;</a>
+				</div>
+				<div th:switch="${currentPage}">
+					<span th:case="${maxPage}" class="disabled-link">&gt;&gt;</span>
+					<a th:case="*" href="#" th:href="@{${url}(page=${maxPage})}">&gt;&gt;</a>
+				</li>
+			</div>
+		</div>
 	</div>
 	<!-- end container -->
 	

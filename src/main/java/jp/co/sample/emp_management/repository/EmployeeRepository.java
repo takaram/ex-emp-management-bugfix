@@ -59,6 +59,31 @@ public class EmployeeRepository {
 	}
 
 	/**
+	 * 指定したlimit、offsetで従業員情報を取得します.
+	 * 取得順は入社日の降順(重複の場合はIDの降順)です。
+	 *
+	 * @param limit 取得件数
+	 * @param offset オフセット
+	 * @return 従業員情報のリスト
+	 */
+	public List<Employee> findAll(int limit, int offset) {
+		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count "
+				+ "FROM employees ORDER BY hire_date DESC, id DESC LIMIT :limit OFFSET :offset";
+		SqlParameterSource params = new MapSqlParameterSource().addValue("limit", limit).addValue("offset", offset);
+		return template.query(sql, params, EMPLOYEE_ROW_MAPPER);
+	}
+
+	/**
+	 * 登録されている従業員の件数を取得します.
+	 * 
+	 * @return データベースに登録されている件数
+	 */
+	public int getSize() {
+		String sql = "SELECT COUNT(*) FROM employees;";
+		return template.queryForObject(sql, (SqlParameterSource) null, Integer.class);
+	}
+
+	/**
 	 * 主キーから従業員情報を取得します.
 	 * 
 	 * @param id 検索したい従業員ID
@@ -96,5 +121,33 @@ public class EmployeeRepository {
 				+ "FROM employees WHERE name LIKE :name ORDER BY hire_date DESC;";
 		SqlParameterSource params = new MapSqlParameterSource().addValue("name", "%" + name + "%");
 		return template.query(sql, params, EMPLOYEE_ROW_MAPPER);
+	}
+
+	/**
+	 * 名前で従業員情報を曖昧検索します.
+	 *
+	 * @param name 名前
+	 * @param limit 取得件数
+	 * @param offset オフセット
+	 * @return 見つかった従業員情報のリスト. 0人の場合は空のリストになります。
+	 */
+	public List<Employee> searchByName(String name, int limit, int offset) {
+		String sql = "SELECT id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count "
+				+ "FROM employees WHERE name LIKE :name ORDER BY hire_date DESC, id DESC LIMIT :limit OFFSET :offset;";
+		SqlParameterSource params = new MapSqlParameterSource()
+				.addValue("name", "%" + name + "%").addValue("limit", limit).addValue("offset", offset);
+		return template.query(sql, params, EMPLOYEE_ROW_MAPPER);
+	}
+
+	/**
+	 * 名前で検索してヒットする件数を取得します.
+	 * 
+	 * @param name 名前
+	 * @return ヒット件数
+	 */
+	public int getSize(String name) {
+		String sql = "SELECT COUNT(*) FROM employees WHERE name LIKE :name;";
+		SqlParameterSource  param = new MapSqlParameterSource("name", "%" + name + "%");
+		return template.queryForObject(sql, param, Integer.class);
 	}
 }

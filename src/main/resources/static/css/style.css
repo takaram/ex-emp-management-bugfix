@@ -9,3 +9,28 @@
 .error-messages {
 	color: #ff0000;
 }
+
+.page-nav {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.page-nav > div {
+	display: inline-block;
+	text-align: center;
+}
+
+.page-nav > div > div {
+	display: inline-block;
+	padding: 6px 12px;
+	border: solid #cccccc 1px;
+}
+
+.page-nav .current-page {
+	font-weight: bold;
+}
+
+.page-nav .disabled-link {
+	color: gray;
+}

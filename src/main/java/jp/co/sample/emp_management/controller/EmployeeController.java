@@ -1,5 +1,7 @@
 package jp.co.sample.emp_management.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +45,26 @@ public class EmployeeController {
 	/**
 	 * 従業員一覧画面を出力します.
 	 * 
+	 * @param page ページ番号
 	 * @param model モデル
 	 * @return 従業員一覧画面
 	 */
 	@RequestMapping("/showList")
-	public String showList(Model model) {
-		List<Employee> employeeList = employeeService.showList();
+	public String showList(Integer page, Model model) {
+		if (page == null) {
+			page = 1;
+		}
+		List<Employee> employeeList = employeeService.showList(page);
 		model.addAttribute("employeeList", employeeList);
+
+		model.addAttribute("currentPage", page);
+		int maxPage = employeeService.getMaxPageCount();
+		model.addAttribute("maxPage", maxPage);
+		model.addAttribute("shownPageRange", calcPageRange(page, maxPage));
+
+		String url = "/employee/showList";
+		model.addAttribute("url", url);
+
 		return "employee/list";
 	}
 
@@ -57,17 +72,36 @@ public class EmployeeController {
 	 * 入力した名前に部分一致する従業員の一覧画面を出力します.
 	 *
 	 * @param name 検索する名前
+	 * @param page ページ番号
 	 * @param model モデル
 	 * @return 検索でヒットした従業員の一覧画面
 	 */
 	@RequestMapping("/search")
-	public String search(String name, Model model) {
-		List<Employee> employeeList = employeeService.search(name);
+	public String search(String name, Integer page, Model model) {
+		if (page == null) {
+			page = 1;
+		}
+
+		List<Employee> employeeList = employeeService.search(name, page);
+		int maxPage = employeeService.getMaxPageCount(name);
 		if (employeeList.isEmpty()) {
 			model.addAttribute("message", "名前に「" + name + "」を含む従業員は見つかりませんでした");
-			employeeList = employeeService.showList();
+			employeeList = employeeService.showList(page);
+			maxPage = employeeService.getMaxPageCount();
 		}
 		model.addAttribute("employeeList", employeeList);
+
+		model.addAttribute("currentPage", page);
+		model.addAttribute("maxPage", maxPage);
+		model.addAttribute("shownPageRange", calcPageRange(page, maxPage));
+
+		try {
+			String url = "/employee/search?name=" + URLEncoder.encode(name, "UTF-8");
+			model.addAttribute("url", url);
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
+
 		return "employee/list";
 	}
 
@@ -108,5 +142,20 @@ public class EmployeeController {
 		employee.setDependentsCount(form.getIntDependentsCount());
 		employeeService.update(employee);
 		return "redirect:/employee/showList";
+	}
+
+	/**
+	 * ページ番号を表示する範囲を決定します.
+	 * 現在のページが1に近い場合は1～10、最大ページに近い場合は最後の10ページ、
+	 * それ以外の場合は現在のページ-5から10ページです。
+	 * 
+	 * @param currentPage 現在のページ数
+	 * @param maxPage 最後のページ数
+	 * @return 表示する最初のページと最後のページが入った配列
+	 */
+	private int[] calcPageRange(int currentPage, int maxPage) {
+		int minShownPage = Math.max(1, Math.min(currentPage - 5, maxPage - 9));
+		int maxShownPage = Math.min(Math.max(10, currentPage + 4), maxPage);
+		return new int[] {minShownPage, maxShownPage};
 	}
 }
