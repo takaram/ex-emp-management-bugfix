@@ -34,3 +34,22 @@
 .page-nav .disabled-link {
 	color: gray;
 }
+
+.form-smaller {
+	display: flex;
+}
+
+.zipcode input {
+	max-width: 6em;
+}
+
+.zipcode button {
+	margin-left: 0.8em;
+}
+
+.form-control + span {
+	display: inline-block;
+	padding: 0 4px;
+	font-size: 120%;
+  line-height: 34px;
+}

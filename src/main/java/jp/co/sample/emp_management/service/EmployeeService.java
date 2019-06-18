@@ -1,10 +1,15 @@
 package jp.co.sample.emp_management.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import jp.co.sample.emp_management.domain.Employee;
 import jp.co.sample.emp_management.repository.EmployeeRepository;
@@ -113,5 +118,44 @@ public class EmployeeService {
 		int size = employeeRepository.getSize(name);
 		System.out.println(size);
 		return (size - 1) / EMPLOYEES_PER_PAGE + 1;
+	}
+
+	/**
+	 * 従業員情報をデータベースに登録します.
+	 *
+	 * @param employee 登録するEmployeeオブジェクト
+	 */
+	public void create(Employee employee) {
+		employeeRepository.insert(employee);
+	}
+
+	/**
+	 * アップロードされた画像を保存します.
+	 *
+	 * @param uploadedFile 保存するファイル
+	 * @return 保存先のファイル名
+	 * @throws IOException 保存に失敗した場合
+	 */
+	public String saveFile(MultipartFile uploadedFile) throws IOException {
+		String origFilename = uploadedFile.getOriginalFilename();
+		String extension = origFilename.substring(origFilename.lastIndexOf(".") + 1);
+		File dest = createNewFile(extension);
+		uploadedFile.transferTo(dest);
+
+		return dest.getName();
+	}
+
+	/**
+	 * 画像保存用の新しいファイルを作成します.
+	 *
+	 * @param extension ファイルの拡張子
+	 * @return 作成したファイルを表すFileオブジェクト
+	 * @throws IOException ファイルの作成に失敗した場合
+	 */
+	private File createNewFile(String extension) throws IOException {
+		File imagesRoot = ResourceUtils.getFile("classpath:public/img");
+		File file = new File(imagesRoot, UUID.randomUUID() + "." + extension);
+		file.createNewFile();
+		return file;
 	}
 }

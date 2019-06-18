@@ -150,4 +150,19 @@ public class EmployeeRepository {
 		SqlParameterSource  param = new MapSqlParameterSource("name", "%" + name + "%");
 		return template.queryForObject(sql, param, Integer.class);
 	}
+
+	/**
+	 * 従業員をデータベースに登録します.
+	 *
+	 * @param employee 登録するEmployeeオブジェクト
+	 */
+	public void insert(Employee employee) {
+		String sql = "INSERT INTO employees(id,name,image,gender,hire_date,mail_address,zip_code,address,telephone,salary,characteristics,dependents_count) "
+				+ "VALUES ((SELECT MAX(id)+1 FROM employees),"
+				+ ":name,:image,:gender,:hireDate,:mailAddress,:zipCode,:address,:telephone,:salary,:characteristics,:dependentsCount) "
+				+ "RETURNING id;";
+		SqlParameterSource params = new BeanPropertySqlParameterSource(employee);
+		Integer id = template.queryForObject(sql, params, Integer.class);
+		employee.setId(id);
+	}
 }

@@ -1,9 +1,11 @@
 package jp.co.sample.emp_management.controller;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jp.co.sample.emp_management.domain.Employee;
+import jp.co.sample.emp_management.form.NewEmployeeForm;
 import jp.co.sample.emp_management.form.UpdateEmployeeForm;
 import jp.co.sample.emp_management.service.EmployeeService;
 
@@ -30,13 +33,23 @@ public class EmployeeController {
 	private EmployeeService employeeService;
 	
 	/**
-	 * 使用するフォームオブジェクトをリクエストスコープに格納する.
+	 * 更新時に使用するフォームオブジェクトをリクエストスコープに格納する.
 	 * 
 	 * @return フォーム
 	 */
 	@ModelAttribute
-	public UpdateEmployeeForm setUpForm() {
+	public UpdateEmployeeForm setUpUpdateForm() {
 		return new UpdateEmployeeForm();
+	}
+
+	/**
+	 * 新規登録時に使用するフォームオブジェクトをリクエストスコープに格納する.
+	 *
+	 * @return フォーム
+	 */
+	@ModelAttribute
+	public NewEmployeeForm setUpCreateForm() {
+		return new NewEmployeeForm();
 	}
 
 	/////////////////////////////////////////////////////
@@ -148,6 +161,51 @@ public class EmployeeController {
 		employee.setDependentsCount(form.getIntDependentsCount());
 		employeeService.update(employee);
 		return "redirect:/employee/showList";
+	}
+
+	/////////////////////////////////////////////////////
+	// ユースケース：従業員情報を登録する
+	/////////////////////////////////////////////////////
+	/**
+	 * 従業員登録画面を表示します.
+	 *
+	 * @return 従業員登録画面へフォワード
+	 */
+	@RequestMapping("/register")
+	public String register() {
+		return "employee/new";
+	}
+
+	/**
+	 * 従業員情報を登録します.
+	 *
+	 * @param form リクエストパラメータを受け取るフォーム
+	 * @param result BindingResult
+	 * @return 登録成功なら登録した従業員の詳細画面へリダイレクト
+	 */
+	@RequestMapping("/create")
+	public String create(@Validated NewEmployeeForm form, BindingResult result) {
+		if (form.getImage().isEmpty()) {
+			result.rejectValue("image", null, "画像を選択してください");
+		}
+		if (result.hasFieldErrors("zipCode1") || result.hasFieldErrors("zipCode2")) {
+			result.rejectValue("zipCode", null, "郵便番号を入力してください");
+		}
+		if (result.hasErrors()) {
+			return register();
+		}
+
+		Employee employee = new Employee();
+		BeanUtils.copyProperties(form, employee);
+		try {
+			String fileName = employeeService.saveFile(form.getImage());
+			employee.setImage(fileName);
+		} catch (IOException e) {
+			throw new RuntimeException("画像の保存に失敗しました", e);
+		}
+		employeeService.create(employee);
+
+		return "redirect:/employee/showDetail?id=" + employee.getId();
 	}
 
 	/**
